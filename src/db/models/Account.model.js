@@ -1,0 +1,25 @@
+import { DataTypes } from "sequelize";
+
+
+export const Account = (sequelize) => {
+    const Account = sequelize.define("Account", {
+        id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true
+        },
+        tgId: {
+            type: DataTypes.INTEGER
+        },
+        status: {
+            type: DataTypes.STRING,
+            defaultValue: "default"
+        },
+        regDate: {
+            type: DataTypes.DATE,
+            defaultValue: DataTypes.NOW
+        }
+    });
+
+    return Account;
+};
