@@ -1,1 +1,1 @@
-Razvitie bot readme
+Pans Bot README.md
