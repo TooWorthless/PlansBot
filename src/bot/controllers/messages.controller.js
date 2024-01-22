@@ -81,5 +81,43 @@ messagesController.sendInlineMenu = async (msg, bot, data) => {
 };
 
 
+const planStuses = {
+    "inProgress": "В процесі",
+    "completed": "Завершено",
+    "canceled": "Скасовано"
+};
+messagesController.addPlan = async (msg, bot, userState, query) => {
+    try {
+        const chatId = msg.chat.id;
+        
+        const plan = await db.models.Plan.create({
+            accountId: chatId,
+            text: JSON.stringify(query),
+            date: userState.data.date
+        });
+        const ikeyboard = [];
+        ikeyboard.push([{ text: "Підтвердити ✅", callback_data: `plan|accept|${plan.dataValues.id}` }, { text: "Відмінити ❌", callback_data: `plan|cancel|${plan.dataValues.id}` }]);
+        ikeyboard.push([{ text: "Закрити повідомлення ✖", callback_data: "close" }]);
+
+        await bot.sendMessage(
+            chatId,
+            `*Ваш план додано(${userState.data.date} : ${planStuses[plan.dataValues.status]}):*\n\n`+
+            JSON.parse(plan.dataValues.text),
+            {
+                parse_mode: "Markdown",
+                reply_markup: JSON.stringify({
+                    inline_keyboard: ikeyboard
+                })
+            }
+        );
+        
+        botService.close(chatId, userState.data.questionMessageId, bot);
+        botService.delUserState(chatId);
+    } catch (error) {
+        console.log('error.message (in messagesController.addPlan):>> ', error.message);
+    }
+};
+
+
 
 export default messagesController;

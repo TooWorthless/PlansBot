@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize";
 import { Account } from "./models/Account.model.js";
+import { Plan } from "./models/Plan.model.js";
 
 
 const sequelize = new Sequelize({
@@ -16,7 +17,8 @@ const synchronizeDB = async (isForce=false) => {
 const db = {
     sequelize,
     models: {
-        Account: Account(sequelize)
+        Account: Account(sequelize),
+        Plan: Plan(sequelize)
     },
     synchronizeDB
 };

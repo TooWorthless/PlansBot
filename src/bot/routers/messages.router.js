@@ -37,11 +37,22 @@ export const messagesRouter = async (msg, bot) => {
             else {
                 switch (query) {
                     case "⚙️ Меню":
-                        console.log('kadjsk :>> ');
                         botService.resendUserMainInlineMenu(chatId, bot);
                         break;
                 
                     default:
+                        const userState = botService.getUserState(chatId);
+                        if(userState) {
+                            const stage = userState.stage;
+                            switch (stage) {
+                                case "writing_plan":
+                                    messagesController.addPlan(msg, bot, userState, query);
+                                    break;
+                            
+                                default:
+                                    break;
+                            }
+                        }
                         break;
                 }
             }

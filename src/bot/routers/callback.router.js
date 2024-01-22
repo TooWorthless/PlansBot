@@ -1,6 +1,7 @@
 import db from "../../db/index.js";
 import callbackController from "../controllers/callback.controller.js";
 import messagesController from "../controllers/messages.controller.js";
+import botService from "../service/bot.service.js";
 
 
 export const callbackRouter = async (cb, bot) => {
@@ -28,7 +29,16 @@ export const callbackRouter = async (cb, bot) => {
                     callbackController.profile(msg, bot, userData);
                     break;
 
+                case "close":
+                    botService.close(chatId, msg.message_id, bot);
+                    break;
 
+                case "cancel_plan_writing":
+                    const userState = botService.getUserState(chatId);
+                    botService.close(chatId, userState.data.questionMessageId, bot);
+                    botService.delUserState(chatId);
+                    await bot.deleteMessage(chatId, msg.message_id);
+                    break;
                 
 
                 default:
@@ -49,6 +59,10 @@ export const callbackRouter = async (cb, bot) => {
 
                         case "plan_date":
                             callbackController.plan_date(msg, bot, actionData);
+                            break;
+
+                        case "plan":
+                            callbackController.plan(msg, bot, actionData);
                             break;
                     
                         default:

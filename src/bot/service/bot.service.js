@@ -77,5 +77,17 @@ botService.resendUserMainInlineMenu = async (userTgId, bot) => {
 }
 
 
+const usersStates = {};
+botService.changeUserState = (id, state) => {
+    usersStates[id] = state;
+};
+botService.getUserState = (id) => {
+    return usersStates[id];
+};
+botService.delUserState = (id) => {
+    delete usersStates[id];
+};
+
+
 
 export default botService;
