@@ -1,5 +1,6 @@
 import db from "../../db/index.js";
 import callbackController from "../controllers/callback.controller.js";
+import messagesController from "../controllers/messages.controller.js";
 
 
 export const callbackRouter = async (cb, bot) => {
@@ -23,6 +24,13 @@ export const callbackRouter = async (cb, bot) => {
 
             switch (action) {
 
+                case "profile":
+                    callbackController.profile(msg, bot, userData);
+                    break;
+
+
+                
+
                 default:
                     const actionData = action.split("|");
                     const actionType = actionData.splice(0,1)[0];
@@ -30,6 +38,17 @@ export const callbackRouter = async (cb, bot) => {
                     switch (actionType) {
                         case "lang":
                             callbackController.lang(msg, bot, actionData);
+                            break;
+
+                        case "menu":
+                            callbackController.menu(msg, bot, actionData);
+
+                        case "dates_list":
+                            callbackController.datesList(msg, bot, actionData);
+                            break;
+
+                        case "plan_date":
+                            callbackController.plan_date(msg, bot, actionData);
                             break;
                     
                         default:
