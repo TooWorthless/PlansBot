@@ -11,6 +11,13 @@ export const Account = (sequelize) => {
         tgId: {
             type: DataTypes.INTEGER
         },
+        info: {
+            type: DataTypes.INTEGER
+        },
+        lang: {
+            type: DataTypes.STRING,
+            defaultValue: "ukr"
+        },
         status: {
             type: DataTypes.STRING,
             defaultValue: "default"
