@@ -14,6 +14,7 @@ callbackController.lang = async (msg, bot, data) => {
         const selectedLang = data[1];
         
         if(selectedLang == "eng") {
+            await botService.resendUserMainInlineMenu(chatId, bot);
             const engLangErrMessage = await bot.sendMessage(
                 chatId, 
                 "*Зараз бот підтримує тільки українську мову*\n"+
@@ -22,16 +23,15 @@ callbackController.lang = async (msg, bot, data) => {
                     parse_mode: "Markdown"
                 }
             );
-            setTimeout(() => {
+            // setTimeout(() => {
                 botService.close(chatId, msg.message_id, bot);
-            }, 10000);
+            // }, 10000);
             setTimeout(() => {
-                botService.close(chatId, newMessage.message_id, bot);
-            }, 10000);
-            setTimeout(() => {
-                botService.resendUserMainInlineMenu(chatId, bot);
-            }, 10000);
-    
+                botService.close(chatId, engLangErrMessage.message_id, bot);
+            }, 7000);
+            // setTimeout(() => {
+            // }, 10000);
+
             return;
         }
 
@@ -40,6 +40,9 @@ callbackController.lang = async (msg, bot, data) => {
                 tgId: userTgId
             }
         });
+
+
+        await botService.resendUserMainInlineMenu(chatId, bot);
 
         const newMessage = await bot.sendMessage(
             chatId, 
@@ -50,15 +53,14 @@ callbackController.lang = async (msg, bot, data) => {
         );
 
 
-        setTimeout(() => {
+        // setTimeout(() => {
             botService.close(chatId, msg.message_id, bot);
-        }, 10000);
+        // }, 10000);
         setTimeout(() => {
             botService.close(chatId, newMessage.message_id, bot);
-        }, 10000);
-        setTimeout(() => {
-            botService.resendUserMainInlineMenu(chatId, bot);
-        }, 10000);
+        }, 7000);
+        // setTimeout(() => {
+        // }, 10000);
 
     } catch (error) {
         console.log('error.message (in callbackController.lang):>> ', error.message);
@@ -341,7 +343,7 @@ callbackController.plan_date = async (msg, bot, data) => {
                             [{ text: "Плани на цей день "+stringPlansAmount, callback_data: `plan|list|${day}.${month}.${year-2000}` }],
                             [{ text: "Додати план➕", callback_data: `plan|add|${day}.${month}.${year-2000}` }],
                             [{ text: "Головне меню ↩️", callback_data: `menu|0` }],
-                            [{ text: "⬅️", callback_data: `dates_list|${month}|${year-2000}` }]
+                            [{ text: "Календар ⬅️", callback_data: `dates_list|${month}|${year-2000}` }]
                         ]
                     })
                 }

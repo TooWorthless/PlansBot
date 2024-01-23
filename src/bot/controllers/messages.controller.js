@@ -96,10 +96,10 @@ messagesController.addPlan = async (msg, bot, userState, query) => {
             date: userState.data.date
         });
         const ikeyboard = [];
-        ikeyboard.push([{ text: "Підтвердити ✅", callback_data: `plan|accept|${plan.dataValues.id}` }, { text: "Відмінити ❌", callback_data: `plan|cancel|${plan.dataValues.id}` }]);
-        ikeyboard.push([{ text: "Закрити повідомлення ✖", callback_data: "close" }]);
+        // ikeyboard.push([{ text: "Підтвердити ✅", callback_data: `plan|accept|${plan.dataValues.id}` }, { text: "Відмінити ❌", callback_data: `plan|cancel|${plan.dataValues.id}` }]);
+        // ikeyboard.push([{ text: "Закрити повідомлення ✖", callback_data: "close" }]);
 
-        await bot.sendMessage(
+        const addedPlanMessage = await bot.sendMessage(
             chatId,
             `*Ваш план додано(${userState.data.date} : ${planStuses[plan.dataValues.status]}):*\n\n`+
             JSON.parse(plan.dataValues.text),
@@ -110,6 +110,10 @@ messagesController.addPlan = async (msg, bot, userState, query) => {
                 })
             }
         );
+
+        setTimeout(() => {
+            botService.close(chatId, addedPlanMessage.message_id, bot);
+        }, 7000);
         
         botService.close(chatId, userState.data.questionMessageId, bot);
         botService.delUserState(chatId);
