@@ -23,8 +23,15 @@ callbackController.lang = async (msg, bot, data) => {
                 }
             );
             setTimeout(() => {
-                botService.close(chatId, engLangErrMessage.message_id, bot);
+                botService.close(chatId, msg.message_id, bot);
             }, 10000);
+            setTimeout(() => {
+                botService.close(chatId, newMessage.message_id, bot);
+            }, 10000);
+            setTimeout(() => {
+                botService.resendUserMainInlineMenu(chatId, bot);
+            }, 10000);
+    
             return;
         }
 
@@ -44,8 +51,15 @@ callbackController.lang = async (msg, bot, data) => {
 
 
         setTimeout(() => {
+            botService.close(chatId, msg.message_id, bot);
+        }, 10000);
+        setTimeout(() => {
             botService.close(chatId, newMessage.message_id, bot);
         }, 10000);
+        setTimeout(() => {
+            botService.resendUserMainInlineMenu(chatId, bot);
+        }, 10000);
+
     } catch (error) {
         console.log('error.message (in callbackController.lang):>> ', error.message);
     }
@@ -169,8 +183,7 @@ callbackController.selectLang = async (msg, bot, data) => {
                         [
                             { text: "🇺🇦", callback_data: `lang|${chatId}|ukr`}, 
                             { text: "🇬🇧", callback_data: `lang|${chatId}|eng`}
-                        ],
-                        [{ text: "⬅️", callback_data: "menu|0" }]
+                        ]
                     ]
                 })
             }
