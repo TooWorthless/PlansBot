@@ -18,7 +18,7 @@ messagesController.start = async (msg, bot, userData) => {
 
         const newGreetings = await bot.sendMessage(
             chatId,
-            `*Hello👋, ${userData.info.split("|")[0]}!*`,
+            `*👋, ${userData.info.split("|")[0]}!*`,
             {
                 parse_mode: "Markdown",
                 reply_markup: botService.getMenu()

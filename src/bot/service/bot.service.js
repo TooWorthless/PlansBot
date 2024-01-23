@@ -4,14 +4,32 @@ const botService = {};
 
 
 botService.getInlineMenu = () => {
-    return JSON.stringify({
-        inline_keyboard: [
-            [{ text: "Профіль", callback_data: "profile" }],
-            [{ text: "Календар планів", callback_data: "dates_list|1|24" }, { text: "Щоденник", callback_data: "diary" }],
-            [{ text: "Змінити мову", callback_data: "menu|slang" }],
-            [{ text: "FAQ", callback_data: "faq" }]
-        ]
-    });
+
+    try {
+        const currentDate = new Date();
+        const formattedDate = currentDate.getDate()+"|"+(currentDate.getMonth()+1)+"|"+(currentDate.getFullYear()-2000);
+        console.log('formattedDate :>> ', formattedDate);
+        return JSON.stringify({
+            inline_keyboard: [
+                [{ text: "🗄 Профіль 🗄", callback_data: "profile" }],
+                [{ text: "📅 Календар планів 📅", callback_data: "dates_list|1|24" }, { text: "Сьогодні", callback_data: `plan_date|${formattedDate}` }],
+                [{ text: "Змінити мову", callback_data: "menu|slang" }],
+                [{ text: "📜 FAQ 📜", callback_data: "faq" }]
+            ]
+        });
+    } catch (error) {
+        console.log('error.message (in botService.getInlineMenu):>> ', error.message);
+        return JSON.stringify({
+            inline_keyboard: [
+                [{ text: "🗄 Профіль 🗄", callback_data: "profile" }],
+                [{ text: "📅 Календар планів 📅", callback_data: "dates_list|1|24" }],
+                [{ text: "Змінити мову", callback_data: "menu|slang" }],
+                [{ text: "📜 FAQ 📜", callback_data: "faq" }]
+            ]
+        });
+    }
+
+    
 };
 
 
@@ -35,6 +53,20 @@ botService.close = async (chatId, messageId, bot) => {
     }
 };
 
+botService.close_all = async (msg, bot, data) => {
+    try {
+        const chatId = msg.chat.id;
+        console.log('data :>> ', data);
+
+        for(const messageId of data) {
+            await botService.close(chatId, messageId, bot);
+        }
+        await botService.close(chatId, msg.message_id, bot);
+    } catch (error) {
+        console.log('error.message (in botService.close):>> ', error.message);
+    }
+};
+
 
 botService.resendUserMainInlineMenu = async (userTgId, bot) => {
     try {
@@ -52,7 +84,6 @@ botService.resendUserMainInlineMenu = async (userTgId, bot) => {
             const userAdditionalData = JSON.parse(userData.data);
             console.log('userAdditionalData :>> ', userAdditionalData);
             const previousMainInlineMenuId = userAdditionalData.mId;
-            const previousGreetingMessageId = userAdditionalData.gId;
 
             botService.close(userTgId, previousMainInlineMenuId, bot);
             const newInlineMenu = await bot.sendMessage(

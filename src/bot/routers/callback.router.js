@@ -29,6 +29,10 @@ export const callbackRouter = async (cb, bot) => {
                     callbackController.profile(msg, bot, userData);
                     break;
 
+                case "faq":
+                    callbackController.faq(msg, bot, {});
+                    break;
+
                 case "close":
                     botService.close(chatId, msg.message_id, bot);
                     break;
@@ -63,6 +67,10 @@ export const callbackRouter = async (cb, bot) => {
 
                         case "plan":
                             callbackController.plan(msg, bot, actionData);
+                            break;
+
+                        case "close_all":
+                            botService.close_all(msg, bot, actionData);
                             break;
                     
                         default:

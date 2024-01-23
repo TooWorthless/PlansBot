@@ -23,13 +23,7 @@ callbackController.lang = async (msg, bot, data) => {
                 }
             );
             setTimeout(() => {
-                botService.close(chatId, msg.message_id, bot);
-            }, 10000);
-            setTimeout(() => {
                 botService.close(chatId, engLangErrMessage.message_id, bot);
-            }, 10000);
-            setTimeout(() => {
-                botService.resendUserMainInlineMenu(chatId, bot);
             }, 10000);
             return;
         }
@@ -50,13 +44,7 @@ callbackController.lang = async (msg, bot, data) => {
 
 
         setTimeout(() => {
-            botService.close(chatId, msg.message_id, bot);
-        }, 10000);
-        setTimeout(() => {
             botService.close(chatId, newMessage.message_id, bot);
-        }, 10000);
-        setTimeout(() => {
-            botService.resendUserMainInlineMenu(chatId, bot);
         }, 10000);
     } catch (error) {
         console.log('error.message (in callbackController.lang):>> ', error.message);
@@ -95,6 +83,42 @@ callbackController.profile = async (msg, bot, userData) => {
     }
 };
 
+callbackController.faq = async (msg, bot, data) => {
+    try {
+        const chatId = msg.chat.id;
+
+        await bot.editMessageText(
+            `🚀 *Ласкаво просимо до \`Planify\` FAQ!*\n\n`+
+            `*Як додати нове завдання?*\n`+
+            `Просто оберіть потрібний день в вкладці Календар планів та натисніть Додати план. 📅\n\n`+
+
+            `*Як переглядати статистику?*\n`+
+            `Спочатку оберіть потрібний день та продивіться наявні на цей день плани, кожен з них буде мати статус(виконано, не виконано, в процесі)`+
+            `та можливість підтвердити чи відмінити його виконання. 📊\n\n`+
+
+            `*Чи можна спільно планувати завдання?*\n`+
+            `Зараз ні, але в майбутніх версіях ви зможете додавати друзів та планувати разом! 👫\n\n`+ 
+
+            `*Чи можна налаштувати нагадування?*\n`+
+            `Зараз ні, але в майбутніх версіях це буде доступно\n\n`+
+
+            `*Дякуємо за використання* \`Planify\`*!* *Насолоджуйтеся плануванням своїх днів.* 🌟`,
+            {
+                chat_id: chatId,
+                message_id: msg.message_id,
+                parse_mode: "Markdown",
+                reply_markup: JSON.stringify({
+                    inline_keyboard: [
+                        [{ text: "⬅️", callback_data: "menu|0" }]
+                    ]
+                })
+            }
+        );
+    } catch (error) {
+        console.log('error.message (in callbackController.faq):>> ', error.message);
+    }
+};
+
 
 callbackController.menu = async (msg, bot, data) => {
     try {
@@ -103,7 +127,17 @@ callbackController.menu = async (msg, bot, data) => {
 
         switch (stage) {
             case "0":
-                botService.resendUserMainInlineMenu(chatId, bot);
+                await bot.editMessageText(
+                    `*Меню* ⬇️`,
+                    {
+                        chat_id: chatId,
+                        message_id: msg.message_id,
+                        parse_mode: "Markdown",
+                        reply_markup: botService.getInlineMenu()
+                    }
+                );
+
+                // botService.resendUserMainInlineMenu(chatId, bot);
                 break;
 
 
@@ -201,7 +235,9 @@ callbackController.datesList = async (msg, bot, data) => {
             if(dayIndex < 10) dayDate = "0"+dayIndex;
             else dayDate = ""+dayIndex;
             
-
+            console.log(`${dayIndex}.${month}.${year-2000}`);
+            console.log(chatId);
+            
             week.push({ text: dayDate, callback_data: `plan_date|${dayIndex}|${month}|${year-2000}` });
         }
         if(week.length != 0) ikeyboard.push(week);
@@ -230,7 +266,7 @@ callbackController.datesList = async (msg, bot, data) => {
             nextYear++;
             nextMonth = 1;
         }
-        controllers.push({ text: "▶", callback_data: `dates_list|${nextMonth}|${nextYear-2000}` });
+        controllers.push({ text: "▶️", callback_data: `dates_list|${nextMonth}|${nextYear-2000}` });
         
 
         ikeyboard.push(controllers);
@@ -269,6 +305,17 @@ callbackController.plan_date = async (msg, bot, data) => {
         const formattedDateToCheck = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
         const selectedDateToCheck = new Date(year, month-1, day);
 
+
+        const plans = await db.models.Plan.findAll({
+            where: {
+                accountId: chatId,
+                date: `${day}.${month}.${year-2000}`
+            }
+        });
+        let stringPlansAmount = "";
+        if(plans.length != 0) stringPlansAmount = `(${plans.length})`;
+
+
         if(selectedDateToCheck >= formattedDateToCheck) {
             await bot.editMessageText(
                 `*${monthes[month]}, ${day}, ${year}:*`,
@@ -278,9 +325,9 @@ callbackController.plan_date = async (msg, bot, data) => {
                     parse_mode: "Markdown",
                     reply_markup: JSON.stringify({
                         inline_keyboard: [
-                            [{ text: "Плани на цей день", callback_data: `plan|list|${day}.${month}.${year-2000}` }],
+                            [{ text: "Плани на цей день "+stringPlansAmount, callback_data: `plan|list|${day}.${month}.${year-2000}` }],
                             [{ text: "Додати план➕", callback_data: `plan|add|${day}.${month}.${year-2000}` }],
-                            [{ text: "Головне меню", callback_data: `menu|0` }],
+                            [{ text: "Головне меню ↩️", callback_data: `menu|0` }],
                             [{ text: "⬅️", callback_data: `dates_list|${month}|${year-2000}` }]
                         ]
                     })
@@ -289,6 +336,7 @@ callbackController.plan_date = async (msg, bot, data) => {
         }
         else if(formattedDateToCheck > selectedDateToCheck) {
             await bot.editMessageText(
+                `Минулий день\n`+
                 `*${monthes[month]}, ${day}, ${year}:*`,
                 {
                     chat_id: chatId,
@@ -297,7 +345,7 @@ callbackController.plan_date = async (msg, bot, data) => {
                     reply_markup: JSON.stringify({
                         inline_keyboard: [
                             [{ text: "Плани на цей день", callback_data: `plan|list|${day}.${month}.${year-2000}` }],
-                            [{ text: "Головне меню", callback_data: `menu|0` }],
+                            [{ text: "Головне меню ↩️", callback_data: `menu|0` }],
                             [{ text: "⬅️", callback_data: `dates_list|${month}|${year-2000}` }]
                         ]
                     })
@@ -356,6 +404,7 @@ callbackController.plan = async (msg, bot, data) => {
                         date: dateForFindPlans
                     }
                 });
+                let plansMessagesIds = [];
 
                 if(plans.length == 0) {
                     const tempMessage = await bot.sendMessage(
@@ -380,7 +429,7 @@ callbackController.plan = async (msg, bot, data) => {
                         else {
                             ikeyboard.push([{ text: "Закрити повідомлення ✖", callback_data: "close" }]);
                         }
-                        await bot.sendMessage(
+                        const planMessage = await bot.sendMessage(
                             chatId,
                             `*План №${plansCounter} (${planStuses[plan.dataValues.status]}):*\n\n`+
                             JSON.parse(plan.dataValues.text),
@@ -392,7 +441,23 @@ callbackController.plan = async (msg, bot, data) => {
                             }
                         );
                         plansCounter++;
+
+                        plansMessagesIds.push(planMessage.message_id);
                     }
+
+                    await bot.sendMessage(
+                        chatId,
+                        `*Закрити плани:*`,
+                        {
+                            parse_mode: "Markdown",
+                            reply_markup: JSON.stringify({
+                                inline_keyboard: [
+                                    [{ text: "Закрити усі повідомлення ✖", callback_data: "close_all|"+plansMessagesIds.join("|") }]
+                                ]
+                            })
+                        }
+                    );
+                    
                 }
         
                 break;
