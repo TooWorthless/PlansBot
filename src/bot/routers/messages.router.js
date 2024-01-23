@@ -59,17 +59,11 @@ export const messagesRouter = async (msg, bot) => {
         }
         else {
             let newAccount;
-
-            if(msg.chat.type.toLowerCase() != "group") {
+            console.log('msg.chat.type.toLowerCase() :>> ', msg.chat.type.toLowerCase());
+            if(msg.chat.type.toLowerCase() == "private") {
                 newAccount = await db.models.Account.create({
                     tgId: chatId,
                     info: (msg.from.first_name||"")+"|"+(msg.from.last_name||"")+"|"+(msg.from.username||"")
-                });
-            }
-            else if(msg.chat.type.toLowerCase() == "group") {
-                newAccount = await db.models.Account.create({
-                    tgId: chatId,
-                    info: "group|"+msg.chat.title
                 });
             }
 
