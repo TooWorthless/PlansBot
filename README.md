@@ -1,1 +1,2 @@
-Pans Bot README.md
+# Planify Bot
+**Is an bot designed to assist in organizing your time and increasing productivity. With this bot, you can easily and efficiently plan your tasks, monitor deadlines, and achieve set goals.**
